@@ -21,7 +21,7 @@ class LLMClient:
 
     def __init__(self, config: dict):
         self.provider: str = config["provider"]
-        self.model_name: str = config["model_name"]
+        self.model_name: str = os.environ.get("MODEL_NAME", config["model_name"])
         self.temperature: float = config.get("temperature", 0.7)
         self.max_tokens: int = config.get("max_tokens", 1500)
         self._api_key = os.environ.get(config.get("api_key_env", "GENERATION_API_KEY"), "")
@@ -34,7 +34,7 @@ class LLMClient:
             import openai
             kwargs = {"api_key": self._api_key}
             if self.provider == "custom":
-                kwargs["base_url"] = os.environ.get("CUSTOM_LLM_BASE_URL", "")
+                kwargs["base_url"] = os.environ.get("API_BASE", os.environ.get("CUSTOM_LLM_BASE_URL", ""))
             self._client = openai.OpenAI(**kwargs)
         elif self.provider == "anthropic":
             import anthropic
@@ -71,7 +71,7 @@ class LLMClient:
             model=self.model_name,
             messages=messages,
             temperature=self.temperature,
-            max_tokens=self.max_tokens,
+            max_completion_tokens=self.max_tokens,
         )
         text = response.choices[0].message.content or ""
         self._log_raw(prompt, text)

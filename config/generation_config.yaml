@@ -1,7 +1,7 @@
 generation_model:
-  provider: openai            # openai | anthropic | mistral | custom
-  model_name: gpt-4o
-  api_key_env: GENERATION_API_KEY
+  provider: custom            # openai | anthropic | mistral | custom
+  model_name: gpt-5.2         # overridden by MODEL_NAME env var if set
+  api_key_env: API_KEY
   temperature: 0.7
   max_tokens: 1500
 
@@ -11,6 +11,7 @@ dataset:
   output_dir: data/final/
   seed: 42
   version: "1.0.0"
+  enable_dedup: false         # set to true to enable cosine-similarity dedup (requires sentence-transformers)
 
 domain_split:                 # Must sum to 1.0
   insurance: 0.25

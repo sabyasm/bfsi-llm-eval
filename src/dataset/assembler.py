@@ -28,6 +28,7 @@ class DatasetAssembler:
         self.version: str = config.get("dataset", {}).get("version", "1.0.0")
         self.domain_split: dict[str, float] = config.get("domain_split", {})
         self.dimension_split: dict[str, int] = config.get("dimension_split", {})
+        self.enable_dedup: bool = config.get("dataset", {}).get("enable_dedup", False)
         self._dedup_model = None
 
     def assemble(self, records: list[dict]) -> list[dict]:
@@ -38,9 +39,13 @@ class DatasetAssembler:
         valid, invalid = self._validate_all(records)
         logger.info("Validated: %d valid, %d invalid", len(valid), len(invalid))
 
-        # Step 2: Deduplicate
-        deduped = self._deduplicate(valid)
-        logger.info("After dedup: %d records", len(deduped))
+        # Step 2: Deduplicate (optional, off by default)
+        if self.enable_dedup:
+            deduped = self._deduplicate(valid)
+            logger.info("After dedup: %d records", len(deduped))
+        else:
+            deduped = valid
+            logger.info("Dedup skipped (enable_dedup=false)")
 
         # Step 3: Enforce splits
         balanced = self._enforce_splits(deduped)
